@@ -7,6 +7,12 @@ namespace TestOperand.Controllers
     [ApiController]
     public class HomeController : ControllerBase
     {
+        /// <summary>
+        /// Method to get result after performing the given operation.
+        /// Given method accepts any one operand from '+,-,*,/' and perform action on the given array.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("GetResult")]
         public IActionResult GetResult(OperationRequest request)
         {
@@ -16,40 +22,46 @@ namespace TestOperand.Controllers
                 if (flag)
                 {
                     decimal result;
+                    var arr = request.Numbers;
                     switch (request.Operand)
                     {
                         case "+":
-                            result = request.Numbers.Sum();
+                            result = arr.Sum();
                             break;
                         case "-":
-                            result = request.Numbers.Aggregate((a, b) => a - b);
+                            result = arr.Aggregate((a, b) => a - b);
                             break;
                         case "*":
-                            result = request.Numbers.Aggregate((a, b) => a * b);
+                            result = arr.Aggregate((a, b) => a * b);
                             break;
                         case "/":
-                            if (request.Numbers.Skip(1).Any(n => n == 0))
+                            if (arr.Skip(1).Contains(0))
                             {
                                 return BadRequest("Division by zero is not allowed.");
                             }
                             result = request.Numbers.Aggregate((a, b) => a / b);
                             break;
                         default:
-                            return BadRequest();
+                            return BadRequest("Some Error Occured.");
 
                     }
-                    return Ok(new { result });
+                    return Ok(" result : " + result);
                 }
             }
             catch (Exception ex)
             {
                 //log exceptios
             }
-            return BadRequest();
+            return BadRequest("Some Error Occured.");
         }
 
+        /// <summary>
+        /// Method to validate the given request.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         private bool ValidateRequest(OperationRequest request) {
-            if (request == null || String.IsNullOrEmpty(request.Operand) || request.Numbers.Length == 0)
+            if (request == null || String.IsNullOrEmpty(request.Operand) || request.Numbers == null || request.Numbers.Length == 0)
             {
                return false;
             }
